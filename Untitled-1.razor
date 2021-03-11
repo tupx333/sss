@@ -1,0 +1,83 @@
+@page "/tests/charts"
+<Row>
+<Column ColumnSize="ColumnSize.IsThird.OnWidescreen">
+<Card Margin="Margin.Is4.OnY">
+<CardHeader>
+<CardTitle>Line</CardTitle>
+</CardHeader>
+<CardBody>
+<Button Color="Color.Primary" Outline="true" Clicked="@(async () => await HandleRedraw( barChart, GetBarChartDataset ))">Redraw</Button>
+</CardBody>
+<CardBody>
+<Chart @ref="barChart" Type="ChartType.Bar" TItem="double" />
+</CardBody>
+</Card>
+</Column>
+
+</Row>
+@code{
+Chart<double> barChart;
+string[] Labels = { "Red", "Blue", "Yellow", "Green", "Purple", "Orange" };
+List<string> backgroundColors = new List<string> { ChartColor.FromRgba(255, 99, 132, 0.2f), ChartColor.FromRgba(54, 162, 235, 0.2f), ChartColor.FromRgba(255, 206, 86, 0.2f), ChartColor.FromRgba(75, 192, 192, 0.2f), ChartColor.FromRgba(153, 102, 255, 0.2f), ChartColor.FromRgba(255, 159, 64, 0.2f), ChartColor.FromRgba(255, 99, 132, 0.2f), ChartColor.FromRgba(54, 162, 235, 0.2f), ChartColor.FromRgba(255, 206, 86, 0.2f), ChartColor.FromRgba(75, 192, 192, 0.2f), ChartColor.FromRgba(153, 102, 255, 0.2f), ChartColor.FromRgba(255, 159, 64, 0.2f) };
+List<string> borderColors = new List<string> { ChartColor.FromRgba(255, 99, 132, 1f), ChartColor.FromRgba(54, 162, 235, 1f), ChartColor.FromRgba(255, 206, 86, 1f), ChartColor.FromRgba(75, 192, 192, 1f), ChartColor.FromRgba(153, 102, 255, 1f), ChartColor.FromRgba(255, 159, 64, 1f), ChartColor.FromRgba(255, 99, 132, 1f), ChartColor.FromRgba(54, 162, 235, 1f), ChartColor.FromRgba(255, 206, 86, 1f), ChartColor.FromRgba(75, 192, 192, 1f), ChartColor.FromRgba(153, 102, 255, 1f), ChartColor.FromRgba(255, 159, 64, 1f) };
+
+bool isAlreadyInitialised;
+
+Random random = new Random(DateTime.Now.Millisecond);
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+if (!isAlreadyInitialised)
+{
+isAlreadyInitialised = true;
+
+await Task.WhenAll(HandleRedraw(barChart, GetBarChartDataset));
+
+}
+}
+
+async Task HandleRedraw<TDataSet, TItem, TOptions, TModel>(Blazorise.Charts.BaseChart<TDataSet, TItem, TOptions, TModel> chart, Func<TDataSet> getDataSet)
+where TDataSet : ChartDataset<TItem>
+where TOptions : ChartOptions
+where TModel : ChartModel
+{
+await chart.Clear();
+await chart.AddLabelsDatasetsAndUpdate(Labels, getDataSet(), getDataSet());
+}
+
+async Task SetDataAndUpdate<TDataSet, TItem, TOptions, TModel>(Blazorise.Charts.BaseChart<TDataSet, TItem, TOptions, TModel> chart, Func<List<TItem>> items)
+where TDataSet : ChartDataset<TItem>
+where TOptions : ChartOptions
+where TModel : ChartModel
+{
+await chart.SetData(0, items());
+await chart.Update();
+}
+
+ChartDataset<double> GetChartDataset()
+{
+return new ChartDataset<double>
+{
+Label = "# of randoms",
+Data = RandomizeData(),
+BackgroundColor = backgroundColors,
+BorderColor = borderColors
+};
+}
+
+
+BarChartDataset<double> GetBarChartDataset()
+{
+return new BarChartDataset<double>
+{
+Label = "# of randoms",
+Data = RandomizeData(),
+BackgroundColor = backgroundColors,
+BorderColor = borderColors,
+BorderWidth = 1
+};
+}
+List<double> RandomizeData()
+{
+return new List<double> { random.Next(3, 50) * random.NextDouble(), random.Next(3, 50) * random.NextDouble(), random.Next(3, 50) * random.NextDouble(), random.Next(3, 50) * random.NextDouble(), random.Next(3, 50) * random.NextDouble(), random.Next(3, 50) * random.NextDouble() };
+} }
